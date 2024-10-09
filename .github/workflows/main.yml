@@ -3,25 +3,28 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger on changes to the main branch
+      - main
 
 jobs:
   build:
-    # Use your self-hosted runner
     runs-on: self-hosted
 
     steps:
-      # Step 1: Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Build the Docker image using the Dockerfile
-      - name: Build Docker image
-        run: docker build -t my-flask-app .
+      # Get the short Git commit hash for tagging
+      - name: Get short Git SHA
+        id: vars
+        run: echo "::set-output name=sha::$(git rev-parse --short HEAD)"
 
-      # Step 3: Deploy the container locally (on the same machine)
+      # Build Docker image and tag it with the commit SHA and latest
+      - name: Build Docker image
+        run: docker build -t my-flask-app:${{ steps.vars.outputs.sha }} -t my-flask-app:latest .
+
+      # Deploy the Docker container with the latest image
       - name: Deploy Docker container
         run: |
-          docker stop flask-app || true  # Stop the running container if it exists
-          docker rm flask-app || true    # Remove the existing container
-          docker run -d -p 5000:5000 --name flask-app my-flask-app
+          docker stop flask-app || true
+          docker rm flask-app || true
+          docker run -d -p 5000:5000 --name flask-app my-flask-app:latest
