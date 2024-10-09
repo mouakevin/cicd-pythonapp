@@ -1,0 +1,21 @@
+name: CI/CD Pipeline
+
+# Trigger the workflow on any push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # Run the job on your self-hosted runner
+    runs-on: self-hosted
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Build the Docker image using the Dockerfile
+      - name: Build Docker image
+        run: docker build -t my-flask-app .
