@@ -1,21 +1,27 @@
 name: CI/CD Pipeline
 
-# Trigger the workflow on any push to the main branch
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on changes to the main branch
 
 jobs:
   build:
-    # Run the job on your self-hosted runner
+    # Use your self-hosted runner
     runs-on: self-hosted
 
     steps:
-      # Checkout the repository code
+      # Step 1: Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Build the Docker image using the Dockerfile
+      # Step 2: Build the Docker image using the Dockerfile
       - name: Build Docker image
         run: docker build -t my-flask-app .
+
+      # Step 3: Deploy the container locally (on the same machine)
+      - name: Deploy Docker container
+        run: |
+          docker stop flask-app || true  # Stop the running container if it exists
+          docker rm flask-app || true    # Remove the existing container
+          docker run -d -p 5000:5000 --name flask-app my-flask-app
